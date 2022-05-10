@@ -43,6 +43,12 @@ class Player {
         context.fillStyle = this.color;
         context.fill();
     }
+
+    move(x, y) {
+        this.x += x;
+        this.y += y;
+        this.draw();
+    }
 }
 
 // Creating Weapon Class
@@ -172,16 +178,16 @@ const spawnEnemy = () => {
     enemies.push(new Enemy(random.x, random.y, enemySize, enemyColor, velocity));
 }
 
-// Endscreen
+// ----------------------- End screen -----------------------
 const gameoverLoader = () => {
-    // Creating endscreen div and play again button and high score element
+    // Creating end screen div and play again button and high score element
     const gameOverBanner = document.createElement("div");
     const gameOverBtn = document.createElement("button");
     const highScore = document.createElement("div");
 
     highScore.innerHTML = `Your Score: ${playerScore}`;
 
-    // adding text to playagin button
+    // adding text to play agin button
     gameOverBtn.innerText = "Play Again";
 
     gameOverBanner.appendChild(highScore);
@@ -198,7 +204,7 @@ const gameoverLoader = () => {
     document.querySelector("body").appendChild(gameOverBanner);
 };
 
-// ------------------------ Creating Animation Funciton ------------------------
+// ------------------------ Creating Animation Function ------------------------
 let animationId;
 function animation() {
     // Making recursion
@@ -320,5 +326,6 @@ canvas.addEventListener("click", (e)=> {
     // adding light weapon in weapons array
     weapons.push(new Weapon(canvas.width / 2, canvas.height / 2,6,"white", velocity));
 });
+
 
 animation();
