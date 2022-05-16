@@ -1,4 +1,3 @@
-// Basic Environment Setup
 const canvas = document.createElement("canvas");
 document.querySelector(".myGame").appendChild(canvas);
 canvas.width = innerWidth;
@@ -8,10 +7,6 @@ const form = document.querySelector("form");
 const scoreBoard = document.querySelector(".scoreBoard");
 let playerScore = 0;
 
-// Basic Function
-
-
-// Event form
 
 document.querySelector("input").addEventListener("click", (e) => {
     e.preventDefault();
@@ -20,15 +15,13 @@ document.querySelector("input").addEventListener("click", (e) => {
     setInterval(spawnEnemy, 1400);
 })
 
-// -------------------- Creating Player, Enemy, Weapong, Etc Classes
-
-// Setting player position to center
+// -------------------- Creating Player, Enemy, Weapon, Etc Classes
 playerPosition = {
     x: canvas.width / 2,
     y: canvas.height / 2,
 }
 
-// Creating Player Class
+
 class Player {
     constructor(x, y, radius, color) {
         this.x = x;
@@ -52,7 +45,6 @@ class Player {
     }
 }
 
-// Creating Weapon Class
 class Weapon {
     constructor(x, y, radius, color, velocity) {
         this.x = x;
@@ -76,7 +68,6 @@ class Weapon {
     }
 }
 
-// Creating Enemy Class
 class Enemy {
     constructor(x, y, radius, color, velocity) {
         this.x = x;
@@ -100,7 +91,6 @@ class Enemy {
     }
 }
 
-// Creating Particle Class
 class Particle {
     constructor(x, y, radius, color, velocity) {
         this.x = x;
@@ -131,71 +121,56 @@ class Particle {
 }
 
 // -------------------------- Main logic --------------------------
-
-// Creating Player Object, Weapons Array, Enemy Array, Etc Array
-const abhi = new Player(playerPosition.x, playerPosition.y, 15, "white");
+const player = new Player(playerPosition.x, playerPosition.y, 15, "white");
 const weapons = [];
 const enemies = [];
 const particles = [];
 
 // ------------------------ Function to Spawn Enemy at Random Location ------------------------
 const spawnEnemy = () => {
-    // generating random size for enemy
     const enemySize = Math.random() * (40 - 5) + 5;
-    // generating random color for enemy
     const enemyColor = `hsl(${Math.floor(Math.random() * 100)}, 100%, 50%)`;
-    // random is Enemy Spawn position
     let random;
 
-    // Making Enemy Location Random but only from outsize of screen
     if (Math.random() < 0.5) {
-        // making X equal to very left off of screen or very right off of screen and setting Y to any where vertically
         random = {
             x: Math.random() < 0.5 ? canvas.width + enemySize : 0 - enemySize,
             y: Math.random() * canvas.height
         };
     } else {
-        // making Y equal to very up off of screen or very down off of screen and setting X to any where horizontally
-        random = {
+       random = {
             x: Math.random() * canvas.width,
             y: Math.random() < 0.5 ? canvas.width + enemySize : 0 - enemySize
         };
     }
 
-
-    // finding Angle between center (means Player position) and enemy position
     const myAngle = Math.atan2(
-        abhi.y - random.y,
-        abhi.x - random.x
+        player.y - random.y,
+        player.x - random.x
     );
 
-    // making velocity or speed of enemy
     const velocity = {
         x: Math.cos(myAngle) * 3,
         y: Math.sin(myAngle) * 3
     };
 
-    // adding enemy to enemies array
     enemies.push(new Enemy(random.x, random.y, enemySize, enemyColor, velocity));
 }
 
 // ----------------------- End screen -----------------------
 const gameoverLoader = () => {
-    // Creating end screen div and play again button and high score element
     const gameOverBanner = document.createElement("div");
     const gameOverBtn = document.createElement("button");
     const highScore = document.createElement("div");
 
     highScore.innerHTML = `Your Score: ${playerScore}`;
 
-    // adding text to play agin button
     gameOverBtn.innerText = "Play Again";
 
     gameOverBanner.appendChild(highScore);
 
     gameOverBanner.appendChild(gameOverBtn);
 
-    // Making reload on clicking playAgain button
     gameOverBtn.onclick = () => {
         window.location.reload();
     };
@@ -209,18 +184,14 @@ const gameoverLoader = () => {
 let animationId;
 
 function animation() {
-    // Making recursion
     animationId = requestAnimationFrame(animation);
 
-    // clearing canvas on each frame
     context.fillStyle = "rgba(49, 49, 49, 0.4)";
 
     context.fillRect(0, 0, canvas.width, canvas.height);
 
-    // draw player
-    abhi.draw();
+    player.draw();
 
-    // Generating Particles
     particles.forEach((particle, particleIndex) => {
         if (particle.alpha <= 0) {
             particles.splice(particleIndex, 1);
@@ -229,11 +200,8 @@ function animation() {
         }
     });
 
-    // generating bullets
     weapons.forEach((weapon, weaponIndex) => {
         weapon.update();
-
-        // Removing Weapons if they are off screen
         if (
             weapon.x + weapon.radius < 1 ||
             weapon.y + weapon.radius < 1 ||
@@ -244,42 +212,34 @@ function animation() {
         }
     })
 
-    // generating enemies
     enemies.forEach((enemy, enemyIndex) => {
         enemy.update();
 
-        // Finding distance between player and enemy
         const distanceBetweenPlayerAndEnemy = Math.hypot(
-            abhi.x - enemy.x,
-            abhi.y - enemy.y
+            player.x - enemy.x,
+            player.y - enemy.y
         );
 
-        // Stop Game if enemy hit player
-        if (distanceBetweenPlayerAndEnemy - abhi.radius - enemy.radius < 1) {
+        if (distanceBetweenPlayerAndEnemy - player.radius - enemy.radius < 1) {
             cancelAnimationFrame(animationId);
 
             return gameoverLoader();
         }
 
         weapons.forEach((weapon, weaponIndex) => {
-            // finding Distance between weapon and enemy
             const distanceBetweenWeaponAndEnemy = Math.hypot(
                 weapon.x - enemy.x,
                 weapon.y - enemy.y
             );
 
             if (distanceBetweenWeaponAndEnemy - weapon.radius - enemy.radius < 1) {
-                // reducing Size of enemy on hit
                 if (enemy.radius > 18) {
                     enemy.radius -= 10;
                     weapons.splice(weaponIndex, 1);
 
-                    // increasing player score when shoot
                     playerScore += 5;
-                    // Rendering player Score in scoreboard html element
                     scoreBoard.innerHTML = `Score: ${playerScore}`;
                 }
-                // Removing enemy on hit if they are below 18
                 else {
                     for (let i = 0; i < enemy.radius * 5; i++) {
                         particles.push(
@@ -295,64 +255,48 @@ function animation() {
                         weapons.splice(weaponIndex, 1);
                     }, 0);
 
-                    // increasing player score when kill one enemy
                     playerScore += 10;
 
-                    // Rendering player Score in scoreboard html element
                     scoreBoard.innerHTML = `Score: ${playerScore}`;
                 }
             }
         });
-
     })
 }
 
 
 // ------------------------ Adding Event Listeners ------------------------
-// event Listener for Light Weapon aka left click
 canvas.addEventListener("click", (e) => {
     // find angle between player position and click co-ordinates
-    const myAngle = Math.atan2(
-        e.clientY - abhi.y,
-        e.clientX - abhi.x,
-    );
+    const myAngle = Math.atan2(e.clientY - player.y, e.clientX - player.x,);
 
-    // making const speed for light weapon
     const velocity = {
         x: Math.cos(myAngle) * 5,
         y: Math.sin(myAngle) * 5
     };
 
-    // adding light weapon in weapons array
-    weapons.push(new Weapon(abhi.x, abhi.y, 6, "white", velocity));
+    weapons.push(new Weapon(player.x, player.y, 6, "white", velocity));
 });
 
-// event Listener for moving player
 addEventListener("keypress", (e) => {
     switch (e.key) {
         case "a":
-            if(abhi.x + abhi.radius > 40)
-                abhi.move(-15, 0);
+            if(player.x + player.radius > 40)
+                player.move(-15, 0);
             break;
         case "w":
-            if(abhi.y + abhi.radius > 50)
-                abhi.move(0, -15);
+            if(player.y + player.radius > 50)
+                player.move(0, -15);
             break;
         case "d":
-            if(abhi.x + abhi.radius < canvas.width - 15)
-                abhi.move(15, 0);
+            if(player.x + player.radius < canvas.width - 15)
+                player.move(15, 0);
             break;
         case "s":
-            if(abhi.y + abhi.radius < canvas.height - 15)
-                abhi.move(0, 15);
+            if(player.y + player.radius < canvas.height - 15)
+                player.move(0, 15);
             break;
     }
-
 });
-
-addEventListener("resize", () => {
-    canvas.width = innerWidth;
-    canvas.height = innerHeight;
-})
 
 animation();
